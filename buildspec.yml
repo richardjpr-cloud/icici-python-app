@@ -1,0 +1,55 @@
+```yaml
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 056611633396.dkr.ecr.ap-south-1.amazonaws.com
+      - REPOSITORY_URI=056611633396.dkr.ecr.ap-south-1.amazonaws.com/icici-python-app
+      - IMAGE_TAG=latest
+
+  build:
+    commands:
+      - echo Building Docker image...
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+
+  post_build:
+    commands:
+      - echo Pushing Docker image to Amazon ECR...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Docker image pushed successfully.
+
+**Save pannuradhu:**
+- `Ctrl + O`
+- `Enter`
+- `Ctrl + X`
+
+> Indha configuration, `icici-python-app` ECR repository ஏற்கனவே irukku-nu assume pannudhu. CodeBuild service role-ku ECR login/push permissions-um thevai.
+
+### 2.5 — GitHub-ku `buildspec.yml` push pannunga
+
+Terminal-la execute pannunga:
+
+```bash
+git add buildspec.yml
+git commit -m "Add CodeBuild buildspec for ECR"
+git push origin main
+```
+
+GitHub website refresh pannumbodhu indha moonu files-um irukkanum:
+
+```text
+icici-python-app/
+├── app.py
+├── Dockerfile
+└── buildspec.yml
+```
+
+### Ippo unga turn
+
+Indha commands execute panni mudichittu **`buildspec push panniten`** nu sollunga.
+
+Adhukku appuram CodeBuild-la GitHub repository connect panni, Docker image build panna thevaiyaana environment settings configure pannuvom. Docker build-kku CodeBuild-la **Privileged mode** enable pannuvadhaiyum check pannuvom.
+
+**Cost reminder:** Free Tier account endraalum CodeBuild usage, ECR storage, matrum adutha ECS resources-ku charges varalaam. தேவையில்லாத build-களைத் தவிர்த்து, AWS Billing dashboard-la usage monitor pannunga.
